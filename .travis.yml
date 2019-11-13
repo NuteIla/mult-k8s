@@ -3,10 +3,15 @@ services:
   - docker
 
 before_install:
-  - docker build -t stephengrider/react-test -f ./client/Dockerfile.dev ./client
+  - openssl aes-256-cbc -K $encrypted_92edb7182018_key -iv $encrypted_92edb7182018_iv -in service-account.json.enc -out service-account.json -d
+  - curl https://sdk.cloud.google.cloud | bash > /dev/null;
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  - gcloud components update kubectl
+  - gcloud auth activate-service-account --key-file service-account.json
+  - docker build -t hazelnut95/react-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run stephengrider/react-test npm test -- --coverage
+  - docker run hazelnut95/react-test npm test -- --coverage
 
 after_success:
   - docker build -t stephengrider/multi-client ./client
