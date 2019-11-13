@@ -7,7 +7,8 @@ env:
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
   - openssl aes-256-cbc -K $encrypted_92edb7182018_key -iv $encrypted_92edb7182018_iv -in service-account.json.enc -out service-account.json -d
-  - curl https://sdk.cloud.google.cloud | bash > /dev/null;
+  - docker build -t hazelnut95/react-test -f ./client/Dockerfile.dev ./client
+  - curl https://sdk.cloud.google.com | bash > /dev/null;
   - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud components update kubectl
   - gcloud auth activate-service-account --key-file service-account.json
@@ -15,7 +16,6 @@ before_install:
   - gcloud config set compute/zone asia-southeast1-a
   - gcloud container clusters get-credentials multi-k8s
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker build -t hazelnut95/react-test -f ./client/Dockerfile.dev ./client
 script:
   - docker run -e CI=true hazelnut95/react-test npm run test
 deploy: 
