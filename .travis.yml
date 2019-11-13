@@ -8,10 +8,14 @@ before_install:
   - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud components update kubectl
   - gcloud auth activate-service-account --key-file service-account.json
+  - gcloud config set project artful-host-258904
+  - gcloud config set compute/zone asia-southeast1-a
+  - gcloud container clusters get-credentials multi-k8s
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t hazelnut95/react-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run hazelnut95/react-test npm test -- --coverage
+  - docker run -e CI=true hazelnut95/react-test npm run test
 
 after_success:
   - docker build -t stephengrider/multi-client ./client
