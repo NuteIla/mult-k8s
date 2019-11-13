@@ -1,7 +1,10 @@
 sudo: required
 services:
   - docker
-
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
   - openssl aes-256-cbc -K $encrypted_92edb7182018_key -iv $encrypted_92edb7182018_iv -in service-account.json.enc -out service-account.json -d
   - curl https://sdk.cloud.google.cloud | bash > /dev/null;
@@ -13,32 +16,10 @@ before_install:
   - gcloud container clusters get-credentials multi-k8s
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t hazelnut95/react-test -f ./client/Dockerfile.dev ./client
-
 script:
   - docker run -e CI=true hazelnut95/react-test npm run test
-
-after_success:
-  - docker build -t stephengrider/multi-client ./client
-  - docker build -t stephengrider/multi-nginx ./nginx
-  - docker build -t stephengrider/multi-server ./server
-  - docker build -t stephengrider/multi-worker ./worker
-  # Log in to the docker CLI
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
-  # Take those images and push them to docker hub
-  - docker push stephengrider/multi-client
-  - docker push stephengrider/multi-nginx
-  - docker push stephengrider/multi-server
-  - docker push stephengrider/multi-worker
-
-deploy:
-  provider: elasticbeanstalk
-  region: us-west-1
-  app: multi-docker
-  env: MultiDocker-env
-  bucket_name: elasticbeanstalk-us-west-1-306476627547
-  bucket_path: docker-multi
+deploy: 
+  provider: script
+  script: bash./deploy.sh
   on:
     branch: master
-  access_key_id: $AWS_ACCESS_KEY
-  secret_access_key:
-    secure: $AWS_SECRET_KEY
