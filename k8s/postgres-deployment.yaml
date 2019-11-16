@@ -25,9 +25,9 @@ spec:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
               subPath: postgres
-          env: 
+          env:
             - name: PGPASSWORD
               valueFrom:
-                secretKeyRef: 
+                secretKeyRef:
                   name: pgpassword
                   key: PGPASSWORD

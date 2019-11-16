@@ -6,6 +6,6 @@ spec:
   type: ClusterIP
   selector:
     component: server
-  ports: 
+  ports:
     - port: 5000
       targetPort: 5000
